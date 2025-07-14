@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cariosree - Heart Risk Calculator</title>
+  <script src="https://cdn.tailwindcss.com "></script>
+  <!-- jsPDF Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js "></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
+    <!-- App Header -->
+    <div class="text-center">
+      <h1 class="text-3xl font-bold text-blue-700">Cariosree</h1>
+      <p class="text-gray-600">Heart Risk Calculator</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex border-b justify-center">
+      <button onclick="showTab('risk')" class="tab px-4 py-2 font-medium text-blue-600 border-b-2 border-blue-600">Risk Assessment</button>
+      <button onclick="showTab('chads2vasc')" class="tab px-4 py-2 text-gray-600">CHADS₂-VASc</button>
+      <button onclick="showTab('grace')" class="tab px-4 py-2 text-gray-600">GRACE Score</button>
+    </div>
+
+    <!-- Risk Assessment Form -->
+    <div id="risk" class="calculator-section">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">General Heart Disease Risk Assessment</h2>
+      <form id="riskForm" class="space-y-4">
+        <!-- Age -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Age</label>
+          <input type="number" name="age" required min="18" max="99" class="w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"/>
+        </div>
+
+        <!-- Gender -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Gender</label>
+          <select name="gender" required class="w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            <option value="">Select</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+
+        <!-- Blood Pressure -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Systolic BP (mmHg)</label>
+          <input type="number" name="systolicBP" required min="90" max="200" class="w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"/>
+        </div>
+
+        <div>
+          <label class="inline-flex items-center">
+            <input type="checkbox" name="bpMedication" class="text-blue-600 focus:ring-blue-500"/>
+            <span class="ml-2 text-gray-700">On Blood Pressure Medication</span>
+          </label>
+        </div>
+
+        <!-- Cholesterol -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Total Cholesterol (mg/dL)</label>
+          <input type="number" name="totalChol" required min="100" max="400" class="w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"/>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">HDL Cholesterol (mg/dL)</label>
+          <input type="number" name="hdlChol" required min="20" max="100" class="w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"/>
+        </div>
+
+        <!-- Smoking & Diabetes -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label class="inline-flex items-center">
+            <input type="checkbox" name="smoker" class="text-blue-600 focus:ring-blue-500"/>
+            <span class="ml-2 text-gray-700">Current Smoker</span>
+          </label>
+          <label class="inline-flex items-center">
+            <input type="checkbox" name="diabetic" class="text-blue-600 focus:ring-blue-500"/>
+            <span class="ml-2 text-gray-700">Diabetic</span>
+          </label>
+        </div>
+
+        <button type="submit" class="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">Calculate Risk</button>
+        <button type="button" onclick="exportToPDF('riskResult', 'Risk Assessment')" class="w-full sm:w-auto px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition mt-2">Export to PDF</button>
+      </form>
+
+      <div id="riskResult" class="mt-4 hidden">
+        <h3 class="font-semibold text-gray-800">Result:</h3>
+        <p id="riskMessage" class="text-gray-700"></p>
+      </div>
+    </div>
+
+    <!-- CHADS₂-VASc Calculator -->
+    <div id="chads2vasc" class="calculator-section hidden">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">CHADS₂-VASc Stroke Risk Calculator</h2>
+      <form id="chads2vascForm" class="space-y-4">
+        <label class="inline-flex items-center">
+          <input type="checkbox" name="hf" class="text-blue-600 focus:ring-blue-500"/>
+          <span class="ml-2 text-gray-700">Congestive Heart Failure</span>
+        </label>
+
+        <label class="inline-flex items-center">
+          <input type="checkbox" name="htn" class="text-blue-600 focus:ring-blue-500"/>
+          <span class="ml-2 text-gray-700">Hypertension</span>
+        </label>
+
+        <label class="inline-flex items-center">
+          <input type="checkbox" name="ageOver75" class="text-blue-600 focus:ring-blue-500"/>
+          <span class="ml-2 text-gray-700">Age >75</span>
+        </label>
+
+        <label class="inline-flex items-center">
+          <input type="checkbox" name="diabetes" class="text-blue-600 focus:ring-blue-500"/>
+          <span class="ml-2 text-gray-700">Diabetes Mellitus</span>
+        </label>
+
+        <label class="inline-flex items-center">
+          <input type="checkbox" name="stroke" class="text-blue-600 focus:ring-blue-500"/>
+          <span class="ml-2 text-gray-700">Stroke or TIA</span>
+        </label>
+
+        <label class="inline-flex items-center">
+          <input type="checkbox" name="vascular" class="text-blue-600 focus:ring-blue-500"/>
+          <span class="ml-2 text-gray-700">Vascular Disease</span>
+        </label>
+
+        <label class="inline-flex items-center">
+          <input type="checkbox" name="female" class="text-blue-600 focus:ring-blue-500"/>
+          <span class="ml-2 text-gray-700">Female</span>
+        </label>
+
+        <button type="submit" class="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">Calculate Score</button>
+        <button type="button" onclick="exportToPDF('chads2vascResult', 'CHADS₂-VASc Score')" class="w-full sm:w-auto px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition mt-2">Export to PDF</button>
+      </form>
+
+      <div id="chads2vascResult" class="mt-4 hidden">
+        <h3 class="font-semibold text-gray-800">Score:</h3>
+        <p id="chads2vascMessage" class="text-gray-700"></p>
+      </div>
+    </div>
+
+    <!-- GRACE Score Calculator -->
+    <div id="grace" class="calculator-section hidden">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">GRACE ACS Mortality Risk Calculator</h2>
+      <form id="graceForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Age</label>
+          <input type="number" name="age" required min="18" max="120" class="w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"/>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Heart Rate (bpm)</label>
+          <input type="number" name="hr" required min="30" max="200" class="w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"/>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Systolic BP (mmHg)</label>
+          <input type="number" name="sbp" required min="50" max="250" class="w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"/>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Creatinine (mg/dL)</label>
+          <input type="number" step="0.1" name="creatinine" required min="0.1" max="10" class="w-full border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"/>
+        </div>
+
+        <label class="inline-flex items-center">
+          <input type="checkbox" name="killipClass" class="text-blue-600 focus:ring-blue-500"/>
+          <span class="ml-2 text-gray-700">Killip Class II or Higher</span>
+        </label>
+
+        <label class="inline-flex items-center">
+          <input type="checkbox" name="cardiacArrest" class="text-blue-600 focus:ring-blue-500"/>
+          <span class="ml-2 text-gray-700">Cardiac Arrest at Admission</span>
+        </label>
+
+        <label class="inline-flex items-center">
+          <input type="checkbox" name="elevatedEnzymes" class="text-blue-600 focus:ring-blue-500"/>
+          <span class="ml-2 text-gray-700">Elevated Cardiac Enzymes</span>
+        </label>
+
+        <button type="submit" class="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition">Calculate Score</button>
+        <button type="button" onclick="exportToPDF('graceResult', 'GRACE Score')" class="w-full sm:w-auto px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition mt-2">Export to PDF</button>
+      </form>
+
+      <div id="graceResult" class="mt-4 hidden">
+        <h3 class="font-semibold text-gray-800">Score:</h3>
+        <p id="graceMessage" class="text-gray-700"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script Logic -->
+  <script>
+    function showTab(tabId) {
+      document.querySelectorAll('.calculator-section').forEach(div => div.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+
+      document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('border-b-2', 'border-blue-600', 'text-blue-600'));
+      event.currentTarget.classList.add('border-b-2', 'border-blue-600', 'text-blue-600');
+    }
+
+    // Framingham Risk Assessment
+    document.getElementById('riskForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      let riskScore = 0;
+
+      const age = parseInt(formData.get('age'));
+      const gender = formData.get('gender');
+      const systolicBP = parseInt(formData.get('systolicBP'));
+      const bpMedication = formData.get('bpMedication') !== null;
+      const totalChol = parseInt(formData.get('totalChol'));
+      const hdlChol = parseInt(formData.get('hdlChol'));
+      const smoker = formData.get('smoker') !== null;
+      const diabetic = formData.get('diabetic') !== null;
+
+      if (gender === 'male') {
+        riskScore += age > 55 ? 2 : 1;
+        riskScore += systolicBP > 140 || bpMedication ? 2 : 1;
+        riskScore += totalChol > 200 ? 2 : 1;
+        riskScore += hdlChol < 40 ? 2 : 0;
+        riskScore += smoker ? 2 : 0;
+        riskScore += diabetic ? 2 : 0;
+      } else {
+        riskScore += age > 60 ? 2 : 1;
+        riskScore += systolicBP > 140 || bpMedication ? 2 : 1;
+        riskScore += totalChol > 220 ? 2 : 1;
+        riskScore += hdlChol < 50 ? 2 : 0;
+        riskScore += smoker ? 2 : 0;
+        riskScore += diabetic ? 3 : 0;
+      }
+
+      const resultDiv = document.getElementById('riskResult');
+      const message = document.getElementById('riskMessage');
+
+      if (riskScore >= 7) {
+        message.innerHTML = `<span class="text-red-600 font-bold">High Risk:</span> You may be at significant risk of heart disease.`;
+      } else if (riskScore >= 4) {
+        message.innerHTML = `<span class="text-yellow-600 font-bold">Moderate Risk:</span> Consider lifestyle changes and consult a provider.`;
+      } else {
+        message.innerHTML = `<span class="text-green-600 font-bold">Low Risk:</span> Keep up the healthy habits!`;
+      }
+
+      resultDiv.classList.remove('hidden');
+      window.riskData = {
+        title: "Risk Assessment",
+         {
+          Age: age,
+          Gender: gender,
+          "Systolic BP": systolicBP,
+          "On BP Meds": bpMedication ? "Yes" : "No",
+          "Total Cholesterol": totalChol,
+          "HDL Cholesterol": hdlChol,
+          Smoker: smoker ? "Yes" : "No",
+          Diabetic: diabetic ? "Yes" : "No"
+        },
+        result: message.innerText
+      };
+    });
+
+    // CHADS₂-VASc Calculator
+    document.getElementById('chads2vascForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      let score = 0;
+
+      const hf = formData.get('hf') !== null;
+      const htn = formData.get('htn') !== null;
+      const ageOver75 = formData.get('ageOver75') !== null;
+      const diabetes = formData.get('diabetes') !== null;
+      const stroke = formData.get('stroke') !== null;
+      const vascular = formData.get('vascular') !== null;
+      const female = formData.get('female') !== null;
+
+      if (hf) score += 1;
+      if (htn) score += 1;
+      if (ageOver75) score += 2;
+      if (diabetes) score += 1;
+      if (stroke) score += 2;
+      if (vascular) score += 1;
+      if (female) score += 1;
+
+      const resultDiv = document.getElementById('chads2vascResult');
+      const message = document.getElementById('chads2vascMessage');
+      message.textContent = `Your CHADS₂-VASc score is ${score}`;
+      resultDiv.classList.remove('hidden');
+
+      window.riskData = {
+        title: "CHADS₂-VASc Score",
+         {
+          "Congestive HF": hf ? "Yes" : "No",
+          Hypertension: htn ? "Yes" : "No",
+          "Age >75": ageOver75 ? "Yes" : "No",
+          Diabetes: diabetes ? "Yes" : "No",
+          Stroke: stroke ? "Yes" : "No",
+          Vascular: vascular ? "Yes" : "No",
+          Female: female ? "Yes" : "No"
+        },
+        result: message.innerText
+      };
+    });
+
+    // GRACE Score Calculator
+    document.getElementById('graceForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      let score = 0;
+
+      const age = parseInt(formData.get('age'));
+      const hr = parseInt(formData.get('hr'));
+      const sbp = parseInt(formData.get('sbp'));
+      const creatinine = parseFloat(formData.get('creatinine'));
+      const killip = formData.get('killipClass') !== null;
+      const arrest = formData.get('cardiacArrest') !== null;
+      const enzymes = formData.get('elevatedEnzymes') !== null;
+
+      score += age;
+      score += hr * 0.5;
+      score += 140 - sbp;
+      score += creatinine * 10;
+      if (killip) score += 20;
+      if (arrest) score += 30;
+      if (enzymes) score += 15;
+
+      const resultDiv = document.getElementById('graceResult');
+      const message = document.getElementById('graceMessage');
+      message.textContent = `Estimated GRACE Score: ${Math.round(score)}. Used for ACS mortality prediction.`;
+      resultDiv.classList.remove('hidden');
+
+      window.riskData = {
+        title: "GRACE Score",
+         {
+          Age: age,
+          "Heart Rate": hr,
+          "Systolic BP": sbp,
+          Creatinine: creatinine,
+          "Killip Class ≥ II": killip ? "Yes" : "No",
+          "Cardiac Arrest": arrest ? "Yes" : "No",
+          "Elevated Enzymes": enzymes ? "Yes" : "No"
+        },
+        result: message.innerText
+      };
+    });
+
+    // Export to PDF Function
+    async function exportToPDF(resultId, title) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const resultDiv = document.getElementById(resultId);
+      const resultText = resultDiv.innerText.trim();
+
+      if (!window.riskData || !window.riskData.data) {
+        alert("No calculation result found.");
+        return;
+      }
+
+      const data = window.riskData.data;
+
+      doc.setFontSize(16);
+      doc.text(title + " Result", 10, 10);
+
+      doc.setFontSize(12);
+      let y = 20;
+      for (const [key, value] of Object.entries(data)) {
+        doc.text(`${key}: ${value}`, 10, y);
+        y += 7;
+      }
+
+      y += 5;
+      doc.setFont("helvetica", "bold");
+      doc.text("Result:", 10, y);
+      doc.setFont("helvetica", "normal");
+      y += 7;
+      doc.text(window.riskData.result, 10, y);
+
+      y += 10;
+      doc.setFontSize(10);
+      doc.text("Generated by Cariosree - Heart Risk Calculator", 10, y);
+
+      doc.save(title + "-result.pdf");
+    }
+  </script>
+</body>
+</html>
